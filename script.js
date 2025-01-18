@@ -37,7 +37,7 @@ fetch('data.json')
                 imageDiv.classList.add('relative', 'bg-gray-800', 'p-4', 'rounded-lg');
                 
                 const img = document.createElement('img');
-                img.classList.add('w-40', 'h-full', 'rounded-lg');
+                img.classList.add('w-40', 'h-auto', 'rounded-lg');
                 img.src = extractImageSrc(imageUrl);
                 img.alt = `Image ${index + 1}`;
                 
