@@ -7,14 +7,14 @@ fetch('data.json')
             const folderDiv = document.createElement('div');
             folderDiv.classList.add('bg-gray-700', 'p-4', 'rounded-lg', 'cursor-pointer', 'hover:bg-gray-600');
             folderDiv.innerText = folder;
-            folderDiv.addEventListener('click', () => showImages(folder, jsonData));
+            folderDiv.addEventListener('click', () => showMedia(folder, jsonData));
             folderList.appendChild(folderDiv);
         });
     })
     .catch(error => console.error('Error loading JSON data:', error));
 
-// Show images in the selected folder
-function showImages(folder, jsonData) {
+// Show media (images/videos) in the selected folder
+function showMedia(folder, jsonData) {
     const folderList = document.getElementById('folderList');
     const imageGrid = document.getElementById('imageGrid');
     const backBtn = document.getElementById('backBtn');
@@ -28,71 +28,127 @@ function showImages(folder, jsonData) {
         imageGrid.classList.add('hidden');
     });
 
-    const images = jsonData.images[folder];
-    grid.innerHTML = ''; // Clear any existing images
+    const media = jsonData.images[folder];
+    grid.innerHTML = ''; // Clear any existing content
 
-    images.forEach((imageData, index) => {
-        const { url, title } = parseImageData(imageData);
+    media.forEach((mediaData, index) => {
+        const { url, title, type } = parseMediaData(mediaData);
 
-        const imageDiv = document.createElement('div');
-        imageDiv.classList.add('relative', 'bg-gray-800', 'p-4', 'rounded-lg');
+        const mediaDiv = document.createElement('div');
+        mediaDiv.classList.add('relative', 'bg-gray-800', 'p-4', 'rounded-lg');
 
-        const img = document.createElement('img');
-        img.classList.add('w-40', 'h-auto', 'rounded-lg');
-        img.src = url;
-        img.alt = title || `Image ${index + 1}`;
+        let mediaElement;
+        if (type === 'video') {
+            if (url.includes('saint2.su')) {
+                mediaElement = createSaintIframe(url);
+            } else {
+                mediaElement = document.createElement('video');
+                mediaElement.classList.add('w-full', 'h-full', 'rounded-lg');
+                mediaElement.src = url;
+                mediaElement.controls = true;
+                mediaElement.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent triggering the slideshow when playing the video
+                });
+            }
+        } else {
+            mediaElement = document.createElement('img');
+            mediaElement.classList.add('w-40', 'h-auto', 'rounded-lg');
+            mediaElement.src = url;
+            mediaElement.alt = title || `Media ${index + 1}`;
+        }
 
         const filename = document.createElement('p');
         filename.classList.add('text-center', 'mt-2', 'text-sm');
-        filename.innerText = title || `Image ${index + 1}`;
+        filename.innerText = title || `Media ${index + 1}`;
 
-        imageDiv.appendChild(img);
-        imageDiv.appendChild(filename);
-        imageDiv.addEventListener('click', () => openSlideshow(index, images));
-        grid.appendChild(imageDiv);
+        mediaDiv.appendChild(mediaElement);
+        mediaDiv.appendChild(filename);
+        mediaDiv.addEventListener('click', () => openSlideshow(index, media));
+        grid.appendChild(mediaDiv);
     });
 }
 
-// Parse image data (support both URL-only and URL+title format)
-function parseImageData(imageData) {
-    const regex = /(?<url>https:\/\/[^\s]+)(?:\s\[(?<title>.+?)\])?/;
-    const match = imageData.match(regex);
+// Parse media data (support both URL-only and URL+title format)
+function parseMediaData(mediaData) {
+    const regex = /(?<url>https:\/\/[^\s]+)(?:\s\[(?<title>.+?)\])?(?:\s\((?<type>image|video)\))?/;
+    const match = mediaData.match(regex);
     return {
         url: match ? match.groups.url : '',
-        title: match && match.groups.title ? match.groups.title : null
+        title: match && match.groups.title ? match.groups.title : null,
+        type: match && match.groups.type ? match.groups.type : 'image'
     };
 }
 
 // Slideshow functionality
 let currentIndex = 0;
-let currentImages = [];
+let currentMedia = [];
 
-function openSlideshow(index, images) {
+function openSlideshow(index, media) {
     currentIndex = index;
-    currentImages = images;
+    currentMedia = media;
     showSlideshow();
 }
 
 function showSlideshow() {
     const slideshowOverlay = document.getElementById('slideshowOverlay');
-    const slideshowImage = document.getElementById('slideshowImage');
+    const slideshowContainer = document.getElementById('slideshowContent');
     const filename = document.getElementById('imageFilename');
 
-    const { url, title } = parseImageData(currentImages[currentIndex]);
-    slideshowImage.src = url;
-    filename.innerText = title || `Image ${currentIndex + 1}`;
+    if (!currentMedia || currentIndex < 0 || currentIndex >= currentMedia.length) {
+        console.error('Invalid media index or media list is empty');
+        return;
+    }
+
+    const { url, title, type } = parseMediaData(currentMedia[currentIndex]);
+    slideshowContainer.innerHTML = ''; // Clear previous content
+
+    let mediaElement;
+    if (type === 'video') {
+        if (url.includes('saint2.su')) {
+            mediaElement = createSaintIframe(url);
+        } else {
+            mediaElement = createVideoElement(url);
+        }
+    } else {
+        mediaElement = document.createElement('img');
+        mediaElement.classList.add('max-w-full', 'rounded-lg');
+        mediaElement.src = url;
+        mediaElement.alt = title || `Media ${currentIndex + 1}`;
+    }
+
+    slideshowContainer.appendChild(mediaElement);
+    filename.innerText = title || `Media ${currentIndex + 1}`;
 
     slideshowOverlay.classList.remove('hidden');
 }
 
+function createVideoElement(url) {
+    const video = document.createElement('video');
+    video.classList.add('max-w-full', 'rounded-lg');
+    video.src = url;
+    video.controls = true;
+    video.autoplay = true;
+    return video;
+}
+
+function createSaintIframe(url) {
+    const iframe = document.createElement('iframe');
+    iframe.classList.add('max-w-full', 'rounded-lg');
+    iframe.src = url;
+    iframe.style.border = 'none';
+    iframe.loading = 'lazy';
+    iframe.allow = 'fullscreen';
+    return iframe;
+}
+
 // Navigation for slideshow
 document.getElementById('nextBtn').addEventListener('click', () => {
-    currentIndex = (currentIndex + 1) % currentImages.length;
+    currentIndex = (currentIndex + 1) % currentMedia.length;
     showSlideshow();
 });
 
 document.getElementById('prevBtn').addEventListener('click', () => {
-    currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+    currentIndex = (currentIndex - 1 + currentMedia.length) % currentMedia.length;
     showSlideshow();
 });
 
