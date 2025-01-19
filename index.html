@@ -8,7 +8,7 @@
 </head>
 <body class="bg-gray-900 text-white">
   <div class="container mx-auto p-8">
-      <h1 class="text-3xl font-bold mb-8 text-center">Gallery HaneAme Cosplay Viewer</h1>
+      <h1 class="text-3xl font-bold mb-8 text-center">HaneAme Cosplay Viewer</h1>
 
       <!-- Folder List -->
       <div id="folderList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8"></div>
@@ -26,21 +26,17 @@
             <button id="closeSlideshow" class="absolute top-2 right-2 text-white text-2xl z-10">X</button>
 
             <!-- Slideshow Content -->
-            <div id="slideshow" class="flex justify-center items-center relative space-x-4">
-                <!-- Previous Button -->
-                <button id="prevBtn" class="text-white text-4xl absolute left-4 sm:left-10 z-10">&#10094;</button>
+            <div id="slideshowContent" class="flex justify-center items-center relative"></div>
 
-                <!-- Image and Filename -->
-                <div id="slideshowImages" class="flex flex-col items-center space-y-2">
-                    <img id="slideshowImage" class="max-w-full rounded-lg" src="" alt="Slideshow Image">
-                    <p id="imageFilename" class="text-center mt-2 text-sm"></p>
-                </div>
+            <!-- Filename -->
+            <p id="imageFilename" class="text-center mt-2 text-sm text-white"></p>
 
-                <!-- Next Button -->
-                <button id="nextBtn" class="text-white text-4xl absolute right-4 sm:right-10 z-10">&#10095;</button>
-            </div>
+            <!-- Navigation Buttons -->
+            <button id="prevBtn" class="text-white text-4xl absolute left-4 sm:left-10 z-10">&#10094;</button>
+            <button id="nextBtn" class="text-white text-4xl absolute right-4 sm:right-10 z-10">&#10095;</button>
         </div>
-    </div>
+      </div>
+
   </div>
 
 
